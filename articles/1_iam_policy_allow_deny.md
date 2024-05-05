@@ -3,7 +3,8 @@ title: "IAMポリシー権限の優先度を確認してみた"
 emoji: "😺"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [AWS, IAM, CLI]
-published: false
+published: true # trueを指定する
+published_at: 2024-05-05 19:00 # 未来の日時を指定する
 ---
 
 # はじめに
