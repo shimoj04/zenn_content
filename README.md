@@ -1,1 +1,3 @@
-# zenn_content
+# Docs for zenn.dev
+https://zenn.dev/zenn
+
