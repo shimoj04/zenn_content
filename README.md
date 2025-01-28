@@ -2,7 +2,7 @@
 https://zenn.dev/zenn
 
 - [Zenn CLIで記事・本を管理する方法](https://zenn.dev/zenn/articles/zenn-cli-guide)
-- 
+- [ZennのMarkdown記法一覧](https://zenn.dev/zenn/articles/markdown-guide)
 
 # zenn実行時の利用コマンド
 
@@ -16,7 +16,7 @@ $ npx zenn new:article
 created: articles/29539f94a6b7b5.md
 
 # 記事のプレビューができる（便利）
-$ npx zenn preview # プレビュー開始                              
+$ npx zenn preview # プレビュー開始
 👀 Preview: http://localhost:8000
 
 # 記事の公開
@@ -24,4 +24,5 @@ $ npx zenn preview # プレビュー開始
 $ git add {ファイル}
 $ git commit -m "{コメント}"
 $ git push
+
 ```sh
