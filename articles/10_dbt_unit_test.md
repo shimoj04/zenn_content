@@ -16,8 +16,6 @@ dbtのUnit testsを利用して、構築したmodelのロジックテストが�
 - `Unit tests`がリリースされた[dbt-core v1.8.0](https://github.com/dbt-labs/dbt-core/releases/tag/v1.8.0)以上
 - dwhはsnowflakeを利用（接続設定は対象外とします）
 
-
-
 ## 3. 全体像
 本記事で実施するステップ内容と作成ファイルを合わせて表にします。
 
@@ -195,10 +193,10 @@ $ dbt run
 |--------|----------------------------------|-------------------------------------|
 | name   | テスト識別名                   | `test_ads_performance_summary`      |
 | model  | テスト対象のモデル名             | `ads_performance_summary`            |
-| given  | テスト用に投入する入力ソース一覧 | `source('ads','ads_performance_details')` <br> `source('ads','ads_conversion_metrics')` |
-| expect | 期待される出力結果（行データ）   | ロジックに対する出力想定結果                  |
+| given  | テスト用に投入する入力ソース | `source('ads','ads_performance_details')` <br> `source('ads','ads_conversion_metrics')` |
+| expect | 期待される出力結果   | ロジックの出力想定結果を登録                  |
 
-表を元に登録内容を設定したファイルは`models/ads_performance_summary.yml`です。
+表を元に登録内容を設定したファイルは`models/ads_performance_summary.yml`となります。
 
 ```yml
 version: 2
@@ -273,7 +271,7 @@ actual differs from expected:
 ...
 ```
 
-先ほど変更した部分が、`優良→キャンセル`になっております。
+先ほど変更した部分が、`優良→キャンセル`になりました。
 どこが一致してないか分かり易いですね。
 
 ### 4.5. ドキュメント作成
