@@ -1,5 +1,5 @@
 ---
-title: "【dbt】モデル構築からユニットテストまで一気通貫で試してみた"
+title: "【dbt】モデル構築からUnit testsまで一気通貫で試してみた"
 emoji: "🐡"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [dbt, snowfalke]
@@ -13,13 +13,15 @@ dbtのUnit testsを利用して、構築したmodelのロジックテストが�
 本記事ではseedの投入からテスト作成まで実行した内容を整理します。
 
 ## 2. 前提条件
-- `Unit tests`がリリースされた[dbt-core v1.8.0](https://github.com/dbt-labs/dbt-core/releases/tag/v1.8.0)以上であること
+- `Unit tests`がリリースされた[dbt-core v1.8.0](https://github.com/dbt-labs/dbt-core/releases/tag/v1.8.0)以上
 - dwhはsnowflakeを利用（接続設定は対象外とします）
 
-## 3. 全体像
-本記事で実施するステップと作成するファイルを合わせて表にします。
 
-| ステップ | 概要                      | 対象ファイル |
+
+## 3. 全体像
+本記事で実施するステップ内容と作成ファイルを合わせて表にします。
+
+| No | 概要                      | 作成ファイル |
 | :-: | :--------------------------- | :------------------------------------ |
 | 1 | seedファイルを投入してテーブルを作成 | `seeds/ads_performance_details.csv`<br>`seeds/ads_conversion_metrics.csv` |
 | 2 | seedテーブルをsourceとして定義     | `models/schema.yml`                  |
@@ -43,60 +45,32 @@ dbt_training/
 :::
 
 
-今回は、広告キャンペーンの詳細データとコンバージョンデータの2つのサンプルファイルを要して
-
-
-### 3.1. source
-source用データとして以下2つのファイルを取り込みます。
-
-| ファイル名                 | 説明      |
-|---------------------------|---------|
-| `ads_performance_details` | 広告キャンペーンの詳細データ（広告費、インプレッション数、クリック数） |
-| `ads_conversion_metrics`  | コンバージョンデータ（コンバージョン数、収益）                     |
-
-### 3.2. model
-2つのsourceからテーブルを作成し以下のテーブルを構築します。
-
-- テーブル定義
-
-| カラム名               | 説明                         |
-|-----------------------|-----------------------------|
-| `date`                | 配信日                      |
-| `campaign_id`         | キャンペーンID             |
-| `total_spend`         | 1日あたりの広告費用        |
-| `total_impressions`   | 1日あたりのインプレッション数 |
-| `total_clicks`        | 1日あたりのクリック数      |
-| `total_conversions`   | 1日あたりのコンバージョン数 |
-| `total_revenue`       | 1日あたりの収益            |
-| `roas`                | 収益 ÷ 広告費用 |
-| `performance_rank`    | ROAS = 0 → キャンセル <br> < 5 → 普通 <br> ≥ 5 → 優良 |
-
 ## 4. 実作業
-それではステップ毎の作業を実施します。
+それでは作業毎の内容を実施します。
 
 ### 4.1. seedファイルを投入してテーブルを作成
-はじめに、取込対象のファイルを`seeds/`直下に配置します。
+はじめに、取込対象の広告キャンペーンの2つのファイルを作成し`seeds/`直下に配置します。
 
-:::details 取込み対象ファイル
-- seeds/ads_performance_details.csv
-    ```
-    date,campaign_id,spend,impressions,clicks
-    2025-05-01,123,500,10000,100
-    2025-05-01,124,300,8000,80
-    2025-05-02,123,300,10000,90
-    2025-05-02,123,200,5000,50
-    ```
-- seeds/ads_conversion_metrics.csv
-    ```
-    date,campaign_id,spend,impressions,clicks
-    2025-05-01,123,500,10000,100
-    2025-05-01,124,300,8000,80
-    2025-05-02,123,300,10000,90
-    2025-05-02,123,200,5000,50
-    ```
-:::
+- 広告キャンペーンの詳細データ（広告費、インプレッション数、クリック数）
+    :::details seeds/ads_performance_details.csv
+        date,campaign_id,spend,impressions,clicks
+        2025-05-01,123,500,10000,100
+        2025-05-01,124,300,8000,80
+        2025-05-02,123,300,10000,90
+        2025-05-02,123,200,5000,50
+    :::
+- 広告キャンペーンのコンバージョンデータ（コンバージョン数・収益）
+    :::details seeds/ads_conversion_metrics.csv
+        ```
+        date,campaign_id,conversions,revenue
+        2025-05-01,123,10,2000
+        2025-05-01,124,8,1500
+        2025-05-02,123,4,2400
+        2025-05-02,123,6,600
+        ```
+    :::
 
-ファイルを排したら`dbt seed`を実行してデータを取込みます。
+ファイル配置後に`dbt seed`を実行してデータを取込みます。
 データ投入先テーブルも同時に作成されますので便利です。
 
 :::details seed実行ログ
@@ -133,9 +107,24 @@ sources:
 ```
 
 ### 4.3. model構築のSQLファイルを作成
-連携されたsourceテーブルを元にmodelを構築する`models/ads_performance_summary.sql`ファイルを作成します。
-seedで投入したデータには同じ日付・キャンペーンのレコードが存在するため、「日付＋キャンペーン」単位で集約処理も行います。
+2つのsourceを元に作成するmodelのテーブル定義を記載します。
 
+| カラム名               | 説明                         |
+|-----------------------|-----------------------------|
+| `date`                | 配信日                      |
+| `campaign_id`         | キャンペーンID             |
+| `total_spend`         | 1日あたりの広告費用        |
+| `total_impressions`   | 1日あたりのインプレッション数 |
+| `total_clicks`        | 1日あたりのクリック数      |
+| `total_conversions`   | 1日あたりのコンバージョン数 |
+| `total_revenue`       | 1日あたりの収益            |
+| `roas`                | 収益 ÷ 広告費用 |
+| `performance_rank`    | ROAS = 0 → キャンセル <br> < 5 → 普通 <br> ≥ 5 → 優良 |
+
+2つのテーブルは「`date`, `campaign_id`」を結合キーとして左結合します。
+なお、seedで投入したデータには同じ日付・キャンペーンのレコードが存在するため、「日付＋キャンペーン」単位で集約処理も行います。
+
+:::details models/ads_performance_summary.sql（model構築用SQLファイル）
 ```sql
 {{ config(materialized='view') }}
 
@@ -177,6 +166,7 @@ left join agg_rev r
   using (date, campaign_id)
 order by a.date, a.campaign_id
 ```
+:::
 
 `dbt run`実行し、構築したSQLを元にmodelを作成します。
 
@@ -197,9 +187,9 @@ $ dbt run
 
 `successfully`と無事に構築ができたことを確認しました！
 
-### 3.4. modelに対するUnit tests（成功）
-それではmodelテスト実施のため`models/ads_performance_summary.yml`ファイルを作成します。
-登録項目を表にします。
+### 4.4. modelに対するUnit tests（成功）
+それでは構築したmodelに対してUnit testsを実施します。
+実施のため作成するファイルの登録内容を以下表に記載します。
 
 | 項目    | 内容                             | 設定値                                |
 |--------|----------------------------------|-------------------------------------|
@@ -208,6 +198,7 @@ $ dbt run
 | given  | テスト用に投入する入力ソース一覧 | `source('ads','ads_performance_details')` <br> `source('ads','ads_conversion_metrics')` |
 | expect | 期待される出力結果（行データ）   | ロジックに対する出力想定結果                  |
 
+表を元に登録内容を設定したファイルは`models/ads_performance_summary.yml`です。
 
 ```yml
 version: 2
@@ -261,11 +252,11 @@ $ dbt test
 
 `successfully`になることが確認できました！
 
-### 3.5. modelに対するUnit tests（失敗）
+### 4.5. modelに対するUnit tests（失敗）
 失敗ケースも確認するため、`models/ads_performance_summary.yml`の以下項目を更新し実行します。
 - `date: "2025-05-03"`のperformance_rankを「キャンセル -> 優良」に変更
 
-改めて実行するとテストに失敗したことが確認できました。
+改めて実行するとテストに失敗したことが確認できます。
 
 ```bash
 $ dbt test
@@ -282,11 +273,11 @@ actual differs from expected:
 ...
 ```
 
-先ほど変更した部分が、`優良→キャンセル`になっているためどこが問題なのか分かり易いです。
+先ほど変更した部分が、`優良→キャンセル`になっております。
+どこが一致してないか分かり易いですね。
 
-### 3.5. ドキュメント作成
-最後にドキュメントを作ってみたいと思います。
-実施にあたり以下のコードを実行し表示されるリンクに遷移します。
+### 4.5. ドキュメント作成
+最後にドキュメントを作ります。作成に必要なコードを実行します。
 
 ```bash
 $ dbt docs generate
@@ -296,22 +287,22 @@ $ dbt docs serve
 To access from your browser, navigate to: http://localhost:8080
 ```
 
-遷移後に、models/ads_performance_summaryにて作成したmodel情報が表示されることが確認できました！
+表示されたリンクの、`models/ads_performance_summary`にて作成したmodel情報が表示されることが確認できました！
 
 ![](/images/10_dbt_unit_test/1_doc.png)
 
 
-データリネージには、定義した内容のフローが図として表示されております。
+データリネージには、定義した内容のフローが図として表示されてますので良いですね！
 ![](/images/10_dbt_unit_test/2_lineage.png)
 
 
-## まとめ
-サンプルパターンのmodelにおいて、seedのファイル投入からUnit testsとドキュメント確認まで実施できました！
-最近dbtを使い出したのですがとても便利なので今後も活用していきたいと思います。
-
+## 5. まとめ
+Unit tests動作確認のためmodel作成からドキュメント確認まで実施しました。
+最近dbtを使い出したのですが便利な機能が豊富で便利ですので、今後も活用していきます。
+簡易的ですが一気通過で内容をまとめましたので未来の自分含めどなたかの助けになれば幸いです。
 
 ## おまけ（Unit testsのinputを登録しない）
-Unit test実行当初は、seedで投入したデータを利用するものと誤認していたためinputを登録せずに実行しておりました。
+Unit tests実行当初は、seedで投入したデータを利用するものと誤認していたためinputを登録せずに実行しておりました。
 `'given' is a required property`とエラーがでておりうまくいきませんでしたのでそのコードも記載します。。
 
 :::details models/ads_performance_summary.ymlのgivenの登録なし
