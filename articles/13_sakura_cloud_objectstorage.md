@@ -211,6 +211,13 @@ output "disk_id" {
 
 
 ```bash
+## さくらのクラウドのアクセスキーをexportする
+export SAKURACLOUD_ACCESS_TOKEN=**********
+export SAKURACLOUD_ACCESS_TOKEN_SECRET=**********
+
+## さくらのクラウドのオブジェクトストレージ用アクセスキーをexportする
+export AWS_ACCESS_KEY_ID=**********
+export AWS_SECRET_ACCESS_KEY=**********
 
 ## init処理を実施
 $ tofu init -migrate-state
