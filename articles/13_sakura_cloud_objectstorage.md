@@ -2,7 +2,7 @@
 title: "【さくらのクラウド】オブジェクトストレージのS3互換APIを使ってみる"
 emoji: "📚"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: [さくらのクラウド, オブジェクトストレージ]
+topics: [さくらのクラウド, オブジェクトストレージ, Opentofu]
 published: true
 published_at: 2025-06-28 20:30
 ---
