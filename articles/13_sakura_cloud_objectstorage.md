@@ -91,7 +91,23 @@ upload failed: ./test.file to s3://{作成したバケット名}/test.file An er
 [【2025年4月17日追記】オブジェクトストレージ AWS CLI および AWS SDK ご利用できないバージョンのご案内](https://cloud.sakura.ad.jp/news/2025/02/04/objectstorage_defectversion/?_gl=1%2A6gwoir%2A_gcl_aw%2AR0NMLjE3NTA5ODAwMjcuRUFJYUlRb2JDaE1Jc295UjNaeVFqZ01WY0ZvUEFoMzNEeVhlRUFBWUFTQUFFZ0xWNHZEX0J3RQ..%2A_gcl_au%2ANjkyOTU0NTc5LjE3NDY1Nzk5OTI.)
 
 
-記事によると、`AWS CLI v2 2.23.0`以降は影響を受けるため、バージョンを下げて再トライします。
+記事によると、`AWS CLI v2 2.23.0`以降は影響を受けるようで、回避策の方法は以下のように記載されております。
+> AWS CLI v2 2.23.5以降をご利用の場合は環境変数「AWS_REQUEST_CHECKSUM_CALCULATION」、「AWS_RESPONSE_CHECKSUM_VALIDATION」を「WHEN_REQUIRED」に設定することで本事象を回避することが可能です。
+
+内容をEXPORTして実行してみます。
+
+```bash
+# 記載の内容をexportする（暫定的に利用可能）
+$ export AWS_REQUEST_CHECKSUM_CALCULATION=WHEN_REQUIRED
+$ export AWS_RESPONSE_CHECKSUM_VALIDATION=WHEN_REQUIRED
+
+# upload可能
+$ aws --endpoint-url="https://s3.isk01.sakurastorage.jp" --profile sakura_s3 --region jp-north-1 s3 cp test.file s3://{作成したバケット名}/require_test/
+upload: ./test.file to s3://{作成したバケット名}/require_test/test.file
+```
+
+uploadが成功しました！
+ちなみに、バージョンを下げても動くか試します。（exportしているので一度terminalを閉じます。）
 
 ```sh
 $ curl "https://awscli.amazonaws.com/AWSCLIV2-2.0.30.pkg" -o "AWSCLIV2.pkg"
@@ -109,7 +125,7 @@ $ aws --version
 aws-cli/2.0.30 Python/3.7.4 Darwin/24.5.0 botocore/2.0.0dev34
 ```
 
-再実行します。
+実行します。
 
 ```sh
 ## ローカルからバケットにファイルをアップロード
@@ -125,7 +141,7 @@ $ ls
 test_download.file	test.file
 ```
 
-ファイルのアップロードもダウンロードも無事に出来ました！
+バージョンを下げても動きますね。
 
 ## 4. OpenTofuのtfstate保存先として使ってみる
 OpenTofuはTerraform互換のIaCツールで、`tfstate`（状態ファイル）を外部ストレージに保存することができます。
@@ -212,12 +228,16 @@ output "disk_id" {
 
 ```bash
 ## さくらのクラウドのアクセスキーをexportする
-export SAKURACLOUD_ACCESS_TOKEN=**********
-export SAKURACLOUD_ACCESS_TOKEN_SECRET=**********
+$ export SAKURACLOUD_ACCESS_TOKEN=**********
+$ export SAKURACLOUD_ACCESS_TOKEN_SECRET=**********
 
 ## さくらのクラウドのオブジェクトストレージ用アクセスキーをexportする
-export AWS_ACCESS_KEY_ID=**********
-export AWS_SECRET_ACCESS_KEY=**********
+$ export AWS_ACCESS_KEY_ID=**********
+$ export AWS_SECRET_ACCESS_KEY=**********
+
+# cliバージョンを下げてない場合はこちらもexportします
+$ export AWS_REQUEST_CHECKSUM_CALCULATION=WHEN_REQUIRED
+$ export AWS_RESPONSE_CHECKSUM_VALIDATION=WHEN_REQUIRED
 
 ## init処理を実施
 $ tofu init -migrate-state
