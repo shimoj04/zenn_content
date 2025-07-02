@@ -67,8 +67,8 @@ LATERAL FLATTEN を用いて配列要素を行方向に展開します。
 ```sql
 SELECT lctt.id
      , lctt.impressions
-     , f1.value:name AS metrics_name
-     , f1.value:value AS metrics_value
+     , f.value:name AS metrics_name
+     , f.value:value AS metrics_value
 FROM {DB}.{SCHEMA}.lateral_check_test_table AS lctt,
 LATERAL FLATTEN(input => lctt.metrics, outer => TRUE) AS f;
 ```
