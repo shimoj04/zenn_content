@@ -26,18 +26,9 @@ Opentofuの状態管理ファイルは、さくらのクラウドのオブジェ
 
 https://zenn.dev/shimoj_tech/articles/13_sakura_cloud_objectstorage
 
-## 2 GithubActionsのQuickstartを実行
-本章では、Quickstartの実行と出力される内容について確認します。
-
-- [Quickstart for GitHub Actions](https://docs.github.com/ja/actions/get-started/quickstart)
-
-### 2.1. Quickstartを動かす
-はじめに、公式のQuickstartを試してみます。
-手順の内容に従って、サンプルコードをリポジトリ配下の`.github/workflows/github-actions-demo.yml`に作成しリモートブランチにpushします。そうすると手順通りに実行されることが確認できました。
-
-
-### 2.2. 登録プレースホルダーを確認する
-サンプルコードで登録されている登録プレースホルダと実行された際の展開値を表にします。
+## 3. GithubActionsのQuickstartを実行
+まずはじめに、[Quickstart for GitHub Actions](https://docs.github.com/ja/actions/get-started/quickstart)の実行と出力を確認します。
+手順通りに動かすことで、サンプルのworkflowを動かせますので実行後の登録プレースホルダと結果の展開値を表にします。
 
 | プレースホルダ                     | 説明                                   | 展開値                                  |
 |------------------------------------|----------------------------------------|-----------------------------------------|
@@ -49,7 +40,7 @@ https://zenn.dev/shimoj_tech/articles/13_sakura_cloud_objectstorage
 | `${{ github.workspace }}`          | リポジトリがクローンされる作業ディレクトリのパス | `/home/runner/work/my_work_log/my_work_log`     |
 | `${{ job.status }}`                | ジョブの最終ステータス                 | `success`                               |
 
-`Lisft files in the repository`項目を確認すると、ディレクトリ直下を参照するようになっているので、以下のように、ファイルとフォルダを追加してpushします。
+`Lisft files in the repository`項目を確認すると、ディレクトリ直下を参照するようになっているので、ファイルとフォルダを追加してpushします。
 ```bash
 ## リポジトリ構成
 .
@@ -59,7 +50,7 @@ https://zenn.dev/shimoj_tech/articles/13_sakura_cloud_objectstorage
 └── test.files
 ```
 
-push後の結果は、想定通りファイルが追加されていることが確認できました！
+push後の結果は、想定通りの構成結果が取得できました。（これは便利）
 
 ```bash
 Run ls /home/runner/work/my_work_log/my_work_log
@@ -70,17 +61,17 @@ sample
 test.files
 ```
 
-## 2. Opentofuのplan/applyを実行
-本章では、Opentofuを利用したさくらのクラウドのリソースをデプロイしてみます。
-実施にあたり以下の内容で進めます
+## 4. Opentofuのplan/applyを実行
+続いて、workflowとOpentofuを利用したさくらのクラウドのリソースをデプロイしてみます。
+実施にあたり以下の内容を試します。
 
-- 2.1. シークレットの登録
-- 2.2. workflowとtofuのコード
-- 2.3. リソース（ディスク）の作成
-- 2.4. リソース（スイッチ）の追加
+- 4.1. シークレットの登録
+- 4.2. workflowとtofuのコード
+- 4.3. リソース（ディスク）の作成
+- 4.4. リソース（スイッチ）の追加
 
-### 2.1. シークレットの登録
-GitHub Actionsでリソースをデプロイするにあたり必要なキー値をgitのsercrets（[Using secrets in GitHub Actions](https://docs.github.com/ja/actions/how-tos/security-for-github-actions/security-guides/using-secrets-in-github-actions)）に登録します。対象の項目を表にします。
+### 4.1. シークレットの登録
+まずはじめに、リソースをデプロイする際に必要なキー値をgitのsercrets（[Using secrets in GitHub Actions](https://docs.github.com/ja/actions/how-tos/security-for-github-actions/security-guides/using-secrets-in-github-actions)）に登録します。対象の項目を表にします。
 
 | No. | シークレット名                           | 説明                                   |
 | :-: | :-------------------------------- | :----------------------------------- |
@@ -93,7 +84,7 @@ GitHub Actionsでリソースをデプロイするにあたり必要なキー値
 |  7  | `SAKURACLOUD_API_ENDPOINT`        | さくらのクラウド API のエンドポイント URL            |
 
 
-### 2.2. workflowとtofuのコード
+### 4.2. workflowとtofuのコード
 続いてworkflowとtofuで管理するファイルと役割、トリガーを表にします。
 
 
@@ -105,10 +96,10 @@ GitHub Actionsでリソースをデプロイするにあたり必要なキー値
 
 
 
-### 2.3. リソース（ディスク）の作成
+### 4.3. リソース（ディスク）の作成
 準備が整いましたのでリソースを作成します。
 
-#### 2.3.1. plan（プルリク作成）
+#### 4.3.1. plan（プルリク作成）
 まずは、さくらのクラウドの`ディスク`がデプロイされるコードのブランチを作成しmainブランチにPR（[ディスクを作成するコードのPR #7](https://github.com/shimoj04/my_work_log/pull/7)）を作成します。
 
 PR作成後にPlan用のworkflowが実行されます！
@@ -136,7 +127,7 @@ Changes to Outputs:
   + disk_name = "disk_from_tofu"
 ```
 
-#### 2.3.2. apply（マージ）
+#### 4.3.2. apply（マージ）
 applyはPRのマージ実行にて発火しますので実行します。実行されたworkflowを記載します。
 
 - [shimoj04 is testing OpenTofu Apply CI/CD🚀 #11](https://github.com/shimoj04/my_work_log/actions/runs/16095819306/job/45418521152)
@@ -172,8 +163,8 @@ $ aws --endpoint-url="https://s3.isk01.sakurastorage.jp" --region jp-north-1 --p
 2025-07-06 14:44:15       2460 terraform.tfstate
 ```
 
-### 2.4. リソース（スイッチ）の追加
-#### 2.4.1. plan（プルリク作成）
+### 4.4. リソース（スイッチ）の追加
+#### 4.4.1. plan（プルリク作成）
 続いて、`スイッチ`を追加します。
 main.tfにスイッチ追加のコードを記載した内容でPR（[スイッチ追加 #8](https://github.com/shimoj04/my_work_log/pull/8)）を作成します。
 先ほどと同様にPlanのworkflowが実行されます。
@@ -181,8 +172,8 @@ main.tfにスイッチ追加のコードを記載した内容でPR（[スイッ�
 - [shimoj04 is testing OpenTofu Plan CI/CD🚀 #17](https://github.com/shimoj04/my_work_log/actions/runs/16095876142/job/45418633811})
 
 
-#### 2.4.2. apply（マージ）
-Planに問題がなかったのでmergeを実行することで、以下のworkflowが動きます。
+#### 4.4.2. apply（マージ）
+追加リソースのみが作成対象になっていることを確認しmergeを実施します。実施後に以下のworkflowが動きます。
 
 - [shimoj04 is testing OpenTofu Apply CI/CD🚀 #12](https://github.com/shimoj04/my_work_log/actions/runs/16095899756)
 
@@ -231,12 +222,12 @@ switch_name = "my-open-tofu-switch"
 ```
 
 
-## まとめ
+## 5. まとめ
 GithubActionsを利用してリソースをデプロイしました。
 plan/applyを切り分けたのみですが検証・本番環境への適用など他にも対応の幅が広そうです。
 登録に少し手間取りましたが、これからどんどん利用していきたいと思います。
 
-## 参考リンク
+## 6. 参考リンク
 
 - [Quickstart for GitHub Actions](https://docs.github.com/ja/actions/get-started/quickstart)
 - [Claude Code GitHub Actionsを使いこなせ！](https://zenn.dev/acntechjp/articles/3f361da473eac8)
