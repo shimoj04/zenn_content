@@ -403,6 +403,21 @@ $ cp target/manifest.json saved_state/prod/manifest.json
 
 検証環境は実施しても、本番環境は未反映ですので差分が適用されることが確認できます。
 
+### 4.3. 後片付け
+動作確認も完了したので、最後に検証で使用したコンテナを停止・削除しておきます。  
+筆者は今後も検証用に使いたいので「停止」のみにしていますが、不要な方は削除コマンドを使ってください。
+
+```bash
+## コンテナの停止
+$ docker-compose stop
+[+] Stopping 2/2
+ ✔ Container dbt_env_sandbox  Stopped 
+ ✔ Container pg_dbt_sandbox   Stopped          
+
+## コンテナの削除
+$ docker-compose down
+```
+
 ## 5. まとめ
 今回は、ローカル環境で`profiles.yml`を使用した環境の切替と、`manifest.json`を活用した差分管理の動作確認を行いました。
 実際に試すことでより理解が深まりましたが、本運用時にはmanifestファイルのリモート管理や、DB設定などより詳細な分離も必要かなと感じました。
