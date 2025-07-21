@@ -270,6 +270,19 @@ with DAG(
 
 左側の緑の縦棒が実行回数で、その下に実行順番「trigger_hello_airflow -> trigger_bash_output_file」が記載されております。
 
+### 4.4. 最後に
+最後にairflow関連のプロセスを終了させておきます。
+
+```bash
+## プロセスを終了させる
+(airflow_venv) $ pkill -f "airflow"
+[1]-  Done                    airflow scheduler
+(airflow_venv) [ssh_user@sv-113701710842 ~]$ 
+[2]+  Done                    airflow webserver -p 8080
+
+(airflow_venv) $ ps aux | grep airflow
+```
+
 ## 5. まとめ
 AirflowとDAG構成の理解を深めるため、環境構築からDAGの実行までを一通り試してみました。
 PythonからBashを扱えたり、ジョブの依存関係をコードで明確に定義できたりと、Airflowがさまざまな場面で活用されている背景がわかった気がしました。
