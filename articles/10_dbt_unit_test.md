@@ -2,7 +2,7 @@
 title: "【dbt】モデル構築からUnit testsまで一気通貫で試してみた"
 emoji: "🐡"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: [dbt, snowfalke]
+topics: [dbt, snowflake]
 published: true
 published_at: 2025-05-17 20:30
 ---
