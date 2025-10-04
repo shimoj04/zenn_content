@@ -1,0 +1,3 @@
+## experiments の除外対象コード
+experiments/docker__dbt_pg_sandbox/.env
+experiments/docker__dbt_pg_sandbox/dbt/*

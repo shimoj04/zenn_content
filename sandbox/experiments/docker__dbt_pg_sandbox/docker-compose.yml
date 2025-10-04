@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: pg_dbt_sandbox
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  dbt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dbt_env_sandbox
+    command: tail -f /dev/null
+    volumes:
+      - ${LOCAL_DBT_PATH}:/dbt
+    working_dir: /dbt
+    depends_on:
+      - postgres
+    tty: true
+    stdin_open: true
+    ports:
+      - "8001:8001"
+    environment:
+      # コンテナ内で profiles.yml を /dbt/.dbt に置いている前提
+      DBT_PROFILES_DIR: /dbt/.dbt
+
+volumes:
+  pgdata:
