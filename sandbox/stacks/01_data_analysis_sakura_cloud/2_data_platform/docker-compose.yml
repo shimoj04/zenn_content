@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  dbt:
+    build:
+      context: ./dbt_runner
+      dockerfile: Dockerfile
+    container_name: dbt-duckdb
+    working_dir: /app
+    volumes:
+      - ./dbt:/app
+      - duckdb_data:/data
+    environment:
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+    command: ["sleep", "infinity"]
+
+  superset:
+    build:
+      context: ./superset
+      dockerfile: Dockerfile
+    container_name: superset
+    environment:
+      SUPERSET_ENV: production
+      SUPERSET_LOAD_EXAMPLES: "no"
+      SUPERSET_SECRET_KEY: "change_this_in_real_env"
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin
+      ADMIN_FIRST_NAME: Admin
+      ADMIN_LAST_NAME: User
+      ADMIN_EMAIL: admin@example.com
+    volumes:
+      - superset_home:/app/superset_home
+      - duckdb_data:/data
+    ports:
+      - "8088:8088"
+    depends_on:
+      - dbt
+
+volumes:
+  duckdb_data:
+  superset_home:
