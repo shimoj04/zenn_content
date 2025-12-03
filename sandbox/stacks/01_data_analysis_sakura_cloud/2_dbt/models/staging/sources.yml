@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: main
+    tables:
+      - name: raw_sales_sys1
+      - name: raw_sales_sys2
+      - name: raw_customer
