@@ -1,3 +1,11 @@
 ## experiments の除外対象コード
 experiments/docker__dbt_pg_sandbox/.env
 experiments/docker__dbt_pg_sandbox/dbt/*
+
+## 除外用のテキストファイル
+text/*
+
+
+## stacks の除外対象コード
+stacks/01_stack__pg_platform/.env
+stacks/02_data_analysis_platform_sakura_cloud/.env
